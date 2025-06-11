@@ -5,6 +5,9 @@ const { MongoClient, ServerApiVersion } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 3000;
 
+app.use(cors());
+app.use(express.json());
+
 app.get("/", (req, res) => {
   console.log("");
   res.send("Marathon Server is running...");
@@ -26,6 +29,21 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     await client.connect();
+
+    const marathonCollection = client
+      .db("marathon")
+      .collection("marathonCollection");
+
+    app.get("/marathons", async (req, res) => {
+      const result = await marathonCollection.find().limit(6).toArray();
+      res.send(result);
+    });
+
+    app.post("/marathons", async (req, res) => {
+      const marathons = req.body;
+      const result = await marathonCollection.insertOne(marathons);
+      res.send(result);
+    });
 
     await client.db("admin").command({ ping: 1 });
     console.log(
