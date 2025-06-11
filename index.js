@@ -34,6 +34,11 @@ async function run() {
       .db("marathon")
       .collection("marathonCollection");
 
+    app.get("/allMarathons", async (req, res) => {
+      const result = await marathonCollection.find().toArray();
+      res.send(result);
+    });
+
     app.get("/marathons", async (req, res) => {
       const result = await marathonCollection.find().limit(6).toArray();
       res.send(result);
