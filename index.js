@@ -34,6 +34,10 @@ async function run() {
       .db("marathon")
       .collection("marathonCollection");
 
+    const registrationsCollection = client
+      .db("marathon")
+      .collection("registration");
+
     app.get("/allMarathons", async (req, res) => {
       const result = await marathonCollection.find().toArray();
       res.send(result);
@@ -54,6 +58,19 @@ async function run() {
     app.post("/marathons", async (req, res) => {
       const marathons = req.body;
       const result = await marathonCollection.insertOne(marathons);
+      res.send(result);
+    });
+
+    // Registration Api
+
+    app.get("/registration", async (req, res) => {
+      const result = await registrationsCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.post("/registration", async (req, res) => {
+      const registration = req.body;
+      const result = await registrationsCollection.insertOne(registration);
       res.send(result);
     });
 
