@@ -50,6 +50,13 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/allMarathons", async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const result = await marathonCollection.find(query).toArray();
+      res.send(result);
+    });
+
     app.get("/marathons", async (req, res) => {
       const result = await marathonCollection.find().limit(6).toArray();
       res.send(result);
