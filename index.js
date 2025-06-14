@@ -39,7 +39,9 @@ async function run() {
       .collection("registration");
 
     app.get("/allMarathons", async (req, res) => {
-      const result = await marathonCollection.find().toArray();
+      const email = req.query.email;
+      const query = { email: email };
+      const result = await marathonCollection.find(query).toArray();
       res.send(result);
     });
 
@@ -47,13 +49,6 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await marathonCollection.findOne(query);
-      res.send(result);
-    });
-
-    app.get("/allMarathons", async (req, res) => {
-      const email = req.query.email;
-      const query = { email: email };
-      const result = await marathonCollection.find(query).toArray();
       res.send(result);
     });
 
@@ -65,6 +60,24 @@ async function run() {
     app.post("/marathons", async (req, res) => {
       const marathons = req.body;
       const result = await marathonCollection.insertOne(marathons);
+      res.send(result);
+    });
+
+    app.put("/allMarathons/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateMarathon = req.body;
+      const updatedDoc = {
+        $set: updateMarathon,
+      };
+      const result = await marathonCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
+
+    app.delete("/allMarathons/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await marathonCollection.deleteOne(query);
       res.send(result);
     });
 
