@@ -82,10 +82,10 @@ async function run() {
     });
 
     // Registration Api
-    app.get("/registration", async (req, res) => {
-      const result = await registrationsCollection.find().toArray();
-      res.send(result);
-    });
+    // app.get("/registration", async (req, res) => {
+    //   const result = await registrationsCollection.find().toArray();
+    //   res.send(result);
+    // });
 
     app.get("/registration", async (req, res) => {
       const email = req.query.email;
