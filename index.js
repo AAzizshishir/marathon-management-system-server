@@ -82,9 +82,20 @@ async function run() {
       res.send(result);
     });
 
+    // Registration
+
     app.get("/registration", async (req, res) => {
       const email = req.query.email;
       const query = { email: email };
+      const result = await registrationsCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.get("/searchMarathon", async (req, res) => {
+      const search = req.query.keyword || "";
+      const query = {
+        title: { $regex: search, $options: "i" },
+      };
       const result = await registrationsCollection.find(query).toArray();
       res.send(result);
     });
