@@ -12,8 +12,6 @@ app.get("/", (req, res) => {
   console.log("");
   res.send("Marathon Server is running...");
 });
-console.log(process.env.db_marathon);
-console.log(process.env.db_password);
 
 const uri = `mongodb+srv://${process.env.db_marathon}:${process.env.db_password}@cluster0.pacddgd.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
@@ -40,8 +38,11 @@ async function run() {
 
     app.get("/allMarathons", async (req, res) => {
       const email = req.query.email;
-      const query = { email: email };
-      const result = await marathonCollection.find(query).toArray();
+      const query = email ? { email: email } : {};
+      const result = await marathonCollection
+        .find(query)
+        .sort({ createdAt: 1 })
+        .toArray();
       res.send(result);
     });
 
@@ -80,12 +81,6 @@ async function run() {
       const result = await marathonCollection.deleteOne(query);
       res.send(result);
     });
-
-    // Registration Api
-    // app.get("/registration", async (req, res) => {
-    //   const result = await registrationsCollection.find().toArray();
-    //   res.send(result);
-    // });
 
     app.get("/registration", async (req, res) => {
       const email = req.query.email;
