@@ -36,6 +36,10 @@ async function run() {
       .db("marathon")
       .collection("registration");
 
+    const upcomingMarathonCollection = client
+      .db("marathon")
+      .collection("upcomingMarathon");
+
     app.get("/allMarathons", async (req, res) => {
       const email = req.query.email;
       const query = email ? { email: email } : {};
@@ -124,6 +128,13 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await registrationsCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // Upcoming Marathon get api
+
+    app.get("/upcomingMarathon", async (req, res) => {
+      const result = await upcomingMarathonCollection.find().toArray();
       res.send(result);
     });
 
