@@ -2,6 +2,10 @@ const express = require("express");
 require("dotenv").config();
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+
+const admin = require("firebase-admin");
+const serviceAccount = require("./firebase-admin-service-key.json");
+
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -24,6 +28,35 @@ const client = new MongoClient(uri, {
   },
 });
 
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
+const verifyFirebaseToken = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).send({ message: "unautorized access" });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  try {
+    const decoded = await admin.auth().verifyIdToken(token);
+    req.decoded = decoded;
+    next();
+  } catch (error) {
+    return res.status(401).send({ message: "unauthorized access" });
+  }
+};
+
+const verifyTokenEmail = async (req, res, next) => {
+  if (req.query.email !== req.decoded.email) {
+    return res.status(403).send({ message: "forbidden access" });
+  }
+  next();
+};
+
 async function run() {
   try {
     await client.connect();
@@ -41,14 +74,24 @@ async function run() {
       .collection("upcomingMarathon");
 
     app.get("/allMarathons", async (req, res) => {
-      const email = req.query.email;
-      const query = email ? { email: email } : {};
       const result = await marathonCollection
-        .find(query)
+        .find()
         .sort({ createdAt: 1 })
         .toArray();
       res.send(result);
     });
+
+    app.get(
+      "/myMarathons",
+      verifyFirebaseToken,
+      verifyTokenEmail,
+      async (req, res) => {
+        const email = req.query.email;
+        const query = email ? { email: email } : {};
+        const result = await marathonCollection.find(query).toArray();
+        res.send(result);
+      }
+    );
 
     app.get("/allMarathons/:id", async (req, res) => {
       const id = req.params.id;
@@ -88,12 +131,17 @@ async function run() {
 
     // Registration
 
-    app.get("/registration", async (req, res) => {
-      const email = req.query.email;
-      const query = { email: email };
-      const result = await registrationsCollection.find(query).toArray();
-      res.send(result);
-    });
+    app.get(
+      "/registration",
+      verifyFirebaseToken,
+      verifyTokenEmail,
+      async (req, res) => {
+        const email = req.query.email;
+        const query = { email: email };
+        const result = await registrationsCollection.find(query).toArray();
+        res.send(result);
+      }
+    );
 
     app.get("/searchMarathon", async (req, res) => {
       const search = req.query.keyword || "";
