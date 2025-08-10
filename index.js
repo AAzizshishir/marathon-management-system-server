@@ -76,7 +76,7 @@ async function run() {
       .db("marathon")
       .collection("upcomingMarathon");
 
-    app.get("/allMarathons", verifyFirebaseToken, async (req, res) => {
+    app.get("/allMarathons", async (req, res) => {
       const result = await marathonCollection
         .find()
         .sort({ createdAt: 1 })
