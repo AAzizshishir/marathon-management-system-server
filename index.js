@@ -104,7 +104,7 @@ async function run() {
     });
 
     app.get("/marathons", async (req, res) => {
-      const result = await marathonCollection.find().limit(8).toArray();
+      const result = await marathonCollection.find().limit(4).toArray();
       res.send(result);
     });
 
