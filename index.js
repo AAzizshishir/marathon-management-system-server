@@ -76,6 +76,8 @@ async function run() {
       .db("marathon")
       .collection("upcomingMarathon");
 
+    const contacts = client.db("marathon").collection("contacts");
+
     app.get("/allMarathons", async (req, res) => {
       const result = await marathonCollection
         .find()
@@ -187,6 +189,33 @@ async function run() {
     app.get("/upcomingMarathon", async (req, res) => {
       const result = await upcomingMarathonCollection.find().limit(4).toArray();
       res.send(result);
+    });
+
+    // Contacts
+    app.post("/contact", async (req, res) => {
+      const { name, email, subject, message } = req.body;
+
+      if (!name || !email || !message) {
+        return res
+          .status(400)
+          .json({ message: "Name, email, and message are required." });
+      }
+
+      const newContact = {
+        name,
+        email,
+        subject: subject || "",
+        message,
+        createdAt: new Date(),
+      };
+
+      try {
+        await contacts.insertOne(newContact);
+        res.status(201).json({ message: "Message received successfully!" });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error, try again later." });
+      }
     });
 
     // await client.db("admin").command({ ping: 1 });
